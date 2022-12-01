@@ -64,17 +64,14 @@ class MediaStreamTrackNative extends MediaStreamTrack {
   @override
   Future<bool> switchCamera() => Helper.switchCamera(this);
 
+  @Deprecated('Use Helper.setSpeakerphoneOn instead')
   @override
   void enableSpeakerphone(bool enable) async {
-    print('MediaStreamTrack:enableSpeakerphone $enable');
-    await WebRTC.invokeMethod(
-      'enableSpeakerphone',
-      <String, dynamic>{'trackId': _trackId, 'enable': enable},
-    );
+    return Helper.setSpeakerphoneOn(enable);
   }
 
   @override
-  Future<ByteBuffer> captureFrame() async {
+  Future<String> captureFrame() async {
     var filePath = await getTemporaryDirectory();
     await WebRTC.invokeMethod(
       'captureFrame',
@@ -83,9 +80,7 @@ class MediaStreamTrackNative extends MediaStreamTrack {
         'path': filePath.path + '/captureFrame.png'
       },
     );
-    return File(filePath.path + '/captureFrame.png')
-        .readAsBytes()
-        .then((value) => value.buffer);
+    return filePath.path + '/captureFrame.png';
   }
 
   @override

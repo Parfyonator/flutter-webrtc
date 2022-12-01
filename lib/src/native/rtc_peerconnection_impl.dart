@@ -157,7 +157,8 @@ class RTCPeerConnectionNative extends RTCPeerConnection {
         String label = map['label'];
         String flutterId = map['flutterId'];
         _dataChannel = RTCDataChannelNative(
-            _peerConnectionId, label, dataChannelId, flutterId);
+            _peerConnectionId, label, dataChannelId, flutterId,
+            state: RTCDataChannelState.RTCDataChannelOpen);
         onDataChannel?.call(_dataChannel!);
         break;
       case 'onRenegotiationNeeded':
@@ -222,7 +223,7 @@ class RTCPeerConnectionNative extends RTCPeerConnection {
   }
 
   EventChannel _eventChannelFor(String peerConnectionId) {
-    return EventChannel('FlutterWebRTC/peerConnectoinEvent$peerConnectionId');
+    return EventChannel('FlutterWebRTC/peerConnectionEvent$peerConnectionId');
   }
 
   @override
@@ -370,7 +371,7 @@ class RTCPeerConnectionNative extends RTCPeerConnection {
     try {
       final response = await WebRTC.invokeMethod('getStats', <String, dynamic>{
         'peerConnectionId': _peerConnectionId,
-        'track': track != null ? track.id : null
+        'trackId': track != null ? track.id : null
       });
 
       var stats = <StatsReport>[];
@@ -378,7 +379,7 @@ class RTCPeerConnectionNative extends RTCPeerConnection {
         List<dynamic> reports = response['stats'];
         reports.forEach((report) {
           stats.add(StatsReport(report['id'], report['type'],
-              report['timestamp'], report['values']));
+              (report['timestamp'] as num).toDouble(), report['values']));
         });
       }
       return stats;
